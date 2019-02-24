@@ -1,0 +1,5 @@
+{
+    "name": "tuxudo/launchdaemons",
+    "description": "Launch Daemon/Agent reporting module for munkireport.",
+    "license": "MIT"
+}

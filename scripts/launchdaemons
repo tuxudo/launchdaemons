@@ -1,0 +1,145 @@
+#!/usr/bin/python
+
+import os
+import subprocess
+import sys
+import plistlib
+import re
+import glob
+import json
+sys.path.insert(0, '/usr/local/munki')
+
+from munkilib import FoundationPlist
+
+def get_daemons():
+    
+    daemons = ""
+            
+    # Get Daemons
+    for file in os.listdir("/Library/LaunchDaemons"):
+        if file.endswith(".plist"):
+            daemons = daemons + "/Library/LaunchDaemons/" + file + "\n"
+            
+    # Get Agents
+    for file in os.listdir("/Library/LaunchAgents"):
+        if file.endswith(".plist"):
+            daemons = daemons + "/Library/LaunchAgents/" + file + "\n"
+            
+            
+    # Get all users' home folders
+    cmd = ['dscl', '.', '-readall', '/Users', 'NFSHomeDirectory']
+    proc = subprocess.Popen(cmd, shell=False, bufsize=-1,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (output, unused_error) = proc.communicate()
+    
+    # Get User Agents
+    for user in output.split('\n'):
+        if 'NFSHomeDirectory' in user and '/var/empty' not in user:
+            userpath = user.replace("NFSHomeDirectory: ", "")+'/Library/LaunchAgents/'
+            if os.path.isdir(userpath):
+                for file in glob.glob(userpath+'*'):
+                        if file.endswith(".plist"):
+                            daemons = daemons + file + "\n"
+     
+    # Systems ones commented out because we don't need to gather that
+    # But they are great for testing with :D
+    
+    # Get System Agents
+    #for file in os.listdir("/System/Library/LaunchAgents"):
+    #    if file.endswith(".plist"):
+    #        daemons = daemons + "/System/Library/LaunchAgents/" + file + "\n"
+            
+    # Get System Daemons
+    #for file in os.listdir("/System/Library/LaunchDaemons"):
+    #    if file.endswith(".plist"):
+    #        daemons = daemons + "/System/Library/LaunchDaemons/" + file + "\n"
+            
+    return daemons[:-1]
+    
+def process_daemons(daemons):
+        
+    if daemons == "":
+        return []
+    
+    # man launchd.plist
+    
+    out = []
+    for daemon in daemons.split('\n'):
+        # Skip malformed plists
+        try:
+            pl = FoundationPlist.readPlist(daemon)
+        except:
+            continue
+
+        daemon_contents = str(pl).split('\n')[:-1][1:]
+            
+        daemonfile = {'label':'','daemon_json':str("\n".join(daemon_contents))}
+        for item in pl:
+            daemonfile['path'] = daemon
+            if item == 'Label':
+                daemonfile['label'] = pl[item]
+            elif item == 'Disabled':
+                daemonfile['disabled'] = to_bool(pl[item])
+            elif item == 'Program':
+                if 'ProgramArguments' in pl and pl['Program'] == str(pl['ProgramArguments'][0]):                
+                    daemonfile['program'] = pl[item]
+                elif 'ProgramArguments' in pl:
+                    program_last = str(pl['Program']).split("/")
+                    program_arg_first = str(pl['ProgramArguments'][0])
+                    if program_last[-1] == program_arg_first:
+                        daemonfile['program'] = "/".join(program_last[:-1])+"/"+str(" ".join(pl['ProgramArguments']))
+                    else:
+                        daemonfile['program'] = str(pl['Program'])+" "+str(pl['ProgramArguments'])
+                else:
+                    daemonfile['program'] = pl[item]
+            
+            elif item == 'ProgramArguments' and 'Program' not in pl:
+                arguments = ""
+                for argstring in pl[item]:
+                    arguments = arguments + argstring + " "
+                daemonfile['program'] = arguments[:-1]
+            elif item == 'OnDemand':
+                daemonfile['ondemand'] = to_bool(pl[item])
+            elif item == 'RunAtLoad':
+                daemonfile['runatload'] = to_bool(pl[item])
+            elif item == 'StartOnMount':
+                daemonfile['startonmount'] = to_bool(pl[item])
+            elif item == 'StartInterval':
+                daemonfile['startinterval'] = pl[item]
+            elif item == 'KeepAlive':
+                if isinstance(pl[item], bool):
+                    daemonfile['keepalive'] = to_bool(pl[item])
+        out.append(daemonfile)
+    return out
+    
+def to_bool(s):
+    if s == True:
+        return 1
+    else:
+        return 0
+
+def main():
+    """Main"""
+    # Create cache dir if it does not exist
+    cachedir = '%s/cache' % os.path.dirname(os.path.realpath(__file__))
+    if not os.path.exists(cachedir):
+        os.makedirs(cachedir)
+
+    # Skip manual check
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'manualcheck':
+            print 'Manual check: skipping'
+            exit(0)
+
+    # Get information about the launchdaemons/agents
+    daemons = get_daemons()
+    result = process_daemons(daemons)
+    
+    # Write launch daemons results to cache
+    output_plist = os.path.join(cachedir, 'launchdaemons.plist')
+    plistlib.writePlist(result, output_plist)
+    #print plistlib.writePlistToString(result)
+
+if __name__ == "__main__":
+    main()
