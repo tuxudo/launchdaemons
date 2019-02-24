@@ -13,6 +13,10 @@ class Launchdaemons_controller extends Module_controller
     {
         // Store module path
         $this->module_path = dirname(__FILE__);
+        
+        // Add local config
+		configAppendFile(__DIR__ . '/config.php', 'launchdaemons');
+	}
     }
     
     /**
