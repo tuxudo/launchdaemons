@@ -3,10 +3,8 @@
 import os
 import subprocess
 import sys
-import plistlib
 import re
 import glob
-import json
 sys.path.insert(0, '/usr/local/munki')
 
 from munkilib import FoundationPlist
@@ -66,50 +64,49 @@ def process_daemons(daemons):
     
     out = []
     for daemon in daemons.split('\n'):
-        # Skip malformed plists
+        # Skip malformed or broken plists
         try:
             pl = FoundationPlist.readPlist(daemon)
+            daemon_contents = str(pl).split('\n')[:-1][1:]
+
+            daemonfile = {'label':'','daemon_json':str("\n".join(daemon_contents))}
+            for item in pl:
+                daemonfile['path'] = daemon
+                if item == 'Label':
+                    daemonfile['label'] = pl[item]
+                elif item == 'Disabled':
+                    daemonfile['disabled'] = to_bool(pl[item])
+                elif item == 'Program':
+                    if 'ProgramArguments' in pl and len(pl['ProgramArguments']) > 0 and pl['Program'] == str(pl['ProgramArguments'][0]):                
+                        daemonfile['program'] = pl[item]
+                    elif 'ProgramArguments' in pl and len(pl['ProgramArguments']) > 0:
+                        program_last = str(pl['Program']).split("/")
+                        program_arg_first = str(pl['ProgramArguments'][0])
+                        if program_last[-1] == program_arg_first:
+                            daemonfile['program'] = "/".join(program_last[:-1])+"/"+str(" ".join(pl['ProgramArguments']))
+                        else:
+                            daemonfile['program'] = str(pl['Program'])+" "+str(pl['ProgramArguments'])
+                    else:
+                        daemonfile['program'] = pl[item]
+                elif item == 'ProgramArguments' and 'Program' not in pl:
+                    arguments = ""
+                    for argstring in pl[item]:
+                        arguments = arguments + argstring + " "
+                    daemonfile['program'] = arguments[:-1]
+                elif item == 'OnDemand':
+                    daemonfile['ondemand'] = to_bool(pl[item])
+                elif item == 'RunAtLoad':
+                    daemonfile['runatload'] = to_bool(pl[item])
+                elif item == 'StartOnMount':
+                    daemonfile['startonmount'] = to_bool(pl[item])
+                elif item == 'StartInterval':
+                    daemonfile['startinterval'] = pl[item]
+                elif item == 'KeepAlive':
+                    if isinstance(pl[item], bool):
+                        daemonfile['keepalive'] = to_bool(pl[item])
         except:
             continue
-
-        daemon_contents = str(pl).split('\n')[:-1][1:]
             
-        daemonfile = {'label':'','daemon_json':str("\n".join(daemon_contents))}
-        for item in pl:
-            daemonfile['path'] = daemon
-            if item == 'Label':
-                daemonfile['label'] = pl[item]
-            elif item == 'Disabled':
-                daemonfile['disabled'] = to_bool(pl[item])
-            elif item == 'Program':
-                if 'ProgramArguments' in pl and pl['Program'] == str(pl['ProgramArguments'][0]):                
-                    daemonfile['program'] = pl[item]
-                elif 'ProgramArguments' in pl:
-                    program_last = str(pl['Program']).split("/")
-                    program_arg_first = str(pl['ProgramArguments'][0])
-                    if program_last[-1] == program_arg_first:
-                        daemonfile['program'] = "/".join(program_last[:-1])+"/"+str(" ".join(pl['ProgramArguments']))
-                    else:
-                        daemonfile['program'] = str(pl['Program'])+" "+str(pl['ProgramArguments'])
-                else:
-                    daemonfile['program'] = pl[item]
-            
-            elif item == 'ProgramArguments' and 'Program' not in pl:
-                arguments = ""
-                for argstring in pl[item]:
-                    arguments = arguments + argstring + " "
-                daemonfile['program'] = arguments[:-1]
-            elif item == 'OnDemand':
-                daemonfile['ondemand'] = to_bool(pl[item])
-            elif item == 'RunAtLoad':
-                daemonfile['runatload'] = to_bool(pl[item])
-            elif item == 'StartOnMount':
-                daemonfile['startonmount'] = to_bool(pl[item])
-            elif item == 'StartInterval':
-                daemonfile['startinterval'] = pl[item]
-            elif item == 'KeepAlive':
-                if isinstance(pl[item], bool):
-                    daemonfile['keepalive'] = to_bool(pl[item])
         out.append(daemonfile)
     return out
     
@@ -138,8 +135,8 @@ def main():
     
     # Write launch daemons results to cache
     output_plist = os.path.join(cachedir, 'launchdaemons.plist')
-    plistlib.writePlist(result, output_plist)
-    #print plistlib.writePlistToString(result)
+    FoundationPlist.writePlist(result, output_plist)
+    #print FoundationPlist.writePlistToString(result)
 
 if __name__ == "__main__":
     main()
