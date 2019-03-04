@@ -129,6 +129,10 @@ def main():
             print 'Manual check: skipping'
             exit(0)
 
+    # Set the encoding
+    reload(sys)  
+    sys.setdefaultencoding('utf8')
+
     # Get information about the launchdaemons/agents
     daemons = get_daemons()
     result = process_daemons(daemons)
