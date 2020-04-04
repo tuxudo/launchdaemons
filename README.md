@@ -14,6 +14,7 @@ The table contains the following information, one row per Launch Daemon:
 * label (string) Daemon's label
 * path (text) Location of daemon
 * disabled (boolean) Is daemon disabled
+* ondemand (boolean) Is daemon set to run on demand
 * runatload (boolean) Is daemon set to run when loaded
 * program (text) What command the daemon executes
 * startonmound (boolean) Will daemon run when volume is mounted
