@@ -26,6 +26,9 @@ class Launchdaemons_model extends \Model
         }
 
         $this->serial = $serial;
+
+        // Add local config
+        configAppendFile(__DIR__ . '/config.php');
     }
 
 
@@ -58,7 +61,7 @@ class Launchdaemons_model extends \Model
             // Process each daemon in the plist
             foreach ($plist as $daemon){
 
-                // Check if is a user daemon and if processing userdaemons is allowed
+                // Check if is a user daemon and if processing user daemons is allowed
                 if ( substr( $daemon['path'], 0, 7 ) === "/Users/" && !conf('user_agents')) {
                     continue;
                 }
