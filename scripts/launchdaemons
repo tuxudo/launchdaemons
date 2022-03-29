@@ -1,10 +1,11 @@
-#!/usr/local/munkireport/munkireport-python2
+#!/usr/local/munki/munki-python
 
 import os
 import subprocess
 import sys
 import re
 import glob
+
 sys.path.insert(0, '/usr/local/munki')
 sys.path.insert(0, '/usr/local/munkireport')
 
@@ -33,7 +34,7 @@ def get_daemons():
     (output, unused_error) = proc.communicate()
     
     # Get User Agents
-    for user in output.split('\n'):
+    for user in output.decode().split('\n'):
         if 'NFSHomeDirectory' in user and '/var/empty' not in user:
             userpath = user.replace("NFSHomeDirectory: ", "")+'/Library/LaunchAgents/'
             if os.path.isdir(userpath):
@@ -119,26 +120,13 @@ def to_bool(s):
 
 def main():
     """Main"""
-    # Create cache dir if it does not exist
-    cachedir = '%s/cache' % os.path.dirname(os.path.realpath(__file__))
-    if not os.path.exists(cachedir):
-        os.makedirs(cachedir)
-
-    # Skip manual check
-    if len(sys.argv) > 1:
-        if sys.argv[1] == 'manualcheck':
-            print 'Manual check: skipping'
-            exit(0)
-
-    # Set the encoding
-    reload(sys)  
-    sys.setdefaultencoding('utf8')
 
     # Get information about the launchdaemons/agents
     daemons = get_daemons()
     result = process_daemons(daemons)
     
     # Write launch daemons results to cache
+    cachedir = '%s/cache' % os.path.dirname(os.path.realpath(__file__))
     output_plist = os.path.join(cachedir, 'launchdaemons.plist')
     FoundationPlist.writePlist(result, output_plist)
     #print FoundationPlist.writePlistToString(result)
