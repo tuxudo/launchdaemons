@@ -101,7 +101,7 @@ def process_daemons(daemons):
                     daemonfile['runatload'] = to_bool(pl[item])
                 elif item == 'StartOnMount':
                     daemonfile['startonmount'] = to_bool(pl[item])
-                elif item == 'StartInterval':
+                elif item == 'StartInterval' and isinstance(pl[item], int):
                     daemonfile['startinterval'] = pl[item]
                 elif item == 'KeepAlive':
                     if isinstance(pl[item], bool):
