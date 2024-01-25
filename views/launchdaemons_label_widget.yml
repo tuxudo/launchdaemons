@@ -1,0 +1,9 @@
+type: scrollbox
+widget_id: launchdaemons_label-widget
+api_url: /module/launchdaemons/get_scroll_widget/label
+i18n_title: launchdaemons.launchdaemons
+icon: fa-rocket
+listing_link: /show/listing/launchdaemons/launchdaemons
+search_key: label
+badge: count
+i18n_empty_result: no_clients

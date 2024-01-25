@@ -1,0 +1,18 @@
+i18n_title: launchdaemons.report
+js_link: module/launchdaemons/js/launchdaemons
+not_null_column: launchdaemons.label
+table:
+  - column: machine.computer_name
+    i18n_header: listing.computername
+    formatter: clientDetail
+    tab_link: launchdaemons-tab
+  - column: reportdata.serial_number
+    i18n_header: serial
+  - {i18n_header: launchdaemons.label, column: launchdaemons.label}
+  - {i18n_header: launchdaemons.path, column: launchdaemons.path}
+  - {i18n_header: launchdaemons.disabled, column: launchdaemons.disabled, formatter: binaryYesNo}
+  - {i18n_header: launchdaemons.ondemand, column: launchdaemons.ondemand, formatter: binaryYesNo}
+  - {i18n_header: launchdaemons.runatload, column: launchdaemons.runatload, formatter: binaryYesNo}
+  - {i18n_header: launchdaemons.startonmount, column: launchdaemons.startonmount, formatter: binaryYesNo}
+  - {i18n_header: launchdaemons.keepalive, column: launchdaemons.keepalive, formatter: binaryYesNo}
+  - {i18n_header: launchdaemons.startinterval, column: launchdaemons.startinterval, formatter: format_launchdaemons_startinterval}

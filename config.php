@@ -12,7 +12,7 @@ return [
 	| 'launchdaemon_ignorelist' = ['com.apple.*'];
 	|
 	| To ignore daemons in the /Users/ folder set
-    | 'user_agents' to FALSE
+	| 'user_agents' to FALSE
 	|
 	*/
 	'launchdaemon_ignorelist' => env('LAUNCHDAEMON_IGNORELIST'),

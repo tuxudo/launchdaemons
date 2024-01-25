@@ -1,0 +1,16 @@
+client_tabs:
+    launchdaemons-tab:
+        view: launchdaemons_tab
+        i18n: launchdaemons.launchdaemons
+        badge: launchdaemons-cnt
+listings:
+    launchdaemons:
+        view: launchdaemons_listing
+        i18n: launchdaemons.launchdaemons
+reports:
+    launchdaemons_report:
+        view: launchdaemons_report
+        i18n: launchdaemons.report
+widgets:
+    launchdaemons_label:
+        view: launchdaemons_label_widget

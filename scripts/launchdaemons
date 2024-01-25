@@ -12,27 +12,26 @@ sys.path.insert(0, '/usr/local/munkireport')
 from munkilib import FoundationPlist
 
 def get_daemons():
-    
+
     daemons = ""
-            
+
     # Get Daemons
     for file in os.listdir("/Library/LaunchDaemons"):
         if file.endswith(".plist"):
             daemons = daemons + "/Library/LaunchDaemons/" + file + "\n"
-            
+
     # Get Agents
     for file in os.listdir("/Library/LaunchAgents"):
         if file.endswith(".plist"):
             daemons = daemons + "/Library/LaunchAgents/" + file + "\n"
-            
-            
+
     # Get all users' home folders
     cmd = ['dscl', '.', '-readall', '/Users', 'NFSHomeDirectory']
     proc = subprocess.Popen(cmd, shell=False, bufsize=-1,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (output, unused_error) = proc.communicate()
-    
+
     # Get User Agents
     for user in output.decode().split('\n'):
         if 'NFSHomeDirectory' in user and '/var/empty' not in user:
@@ -41,29 +40,29 @@ def get_daemons():
                 for file in glob.glob(userpath+'*'):
                         if file.endswith(".plist"):
                             daemons = daemons + file + "\n"
-     
+
     # Systems ones commented out because we don't need to gather that
     # But they are great for testing with :D
-    
+
     # Get System Agents
     #for file in os.listdir("/System/Library/LaunchAgents"):
     #    if file.endswith(".plist"):
     #        daemons = daemons + "/System/Library/LaunchAgents/" + file + "\n"
-            
+
     # Get System Daemons
     #for file in os.listdir("/System/Library/LaunchDaemons"):
     #    if file.endswith(".plist"):
     #        daemons = daemons + "/System/Library/LaunchDaemons/" + file + "\n"
-            
+
     return daemons[:-1]
-    
+
 def process_daemons(daemons):
-        
+
     if daemons == "":
         return []
-    
+
     # man launchd.plist
-    
+
     out = []
     for daemon in daemons.split('\n'):
         # Skip malformed or broken plists
@@ -79,7 +78,7 @@ def process_daemons(daemons):
                 elif item == 'Disabled':
                     daemonfile['disabled'] = to_bool(pl[item])
                 elif item == 'Program':
-                    if 'ProgramArguments' in pl and len(pl['ProgramArguments']) > 0 and pl['Program'] == str(pl['ProgramArguments'][0]):                
+                    if 'ProgramArguments' in pl and len(pl['ProgramArguments']) > 0 and pl['Program'] == str(pl['ProgramArguments'][0]):
                         daemonfile['program'] = pl[item]
                     elif 'ProgramArguments' in pl and len(pl['ProgramArguments']) > 0:
                         program_last = str(pl['Program']).split("/")
@@ -108,10 +107,10 @@ def process_daemons(daemons):
                         daemonfile['keepalive'] = to_bool(pl[item])
         except:
             continue
-            
+
         out.append(daemonfile)
     return out
-    
+
 def to_bool(s):
     if s == True:
         return 1
@@ -124,7 +123,7 @@ def main():
     # Get information about the launchdaemons/agents
     daemons = get_daemons()
     result = process_daemons(daemons)
-    
+
     # Write launch daemons results to cache
     cachedir = '%s/cache' % os.path.dirname(os.path.realpath(__file__))
     output_plist = os.path.join(cachedir, 'launchdaemons.plist')

@@ -8,10 +8,10 @@ class LaunchdaemonsRewrite extends Migration
     public function up()
     {
         $capsule = new Capsule();
-        
+
         // Need to kill the old LaunchDaemon table
         $capsule::schema()->dropIfExists('launchdaemons');
-        
+
         $capsule::schema()->create('launchdaemons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('serial_number');
@@ -25,7 +25,7 @@ class LaunchdaemonsRewrite extends Migration
             $table->integer('startinterval')->nullable();
             $table->boolean('keepalive')->nullable();
             $table->text('daemon_json')->nullable();
-            
+
             // Create indexes
             $table->index('serial_number');
             $table->index('label');
@@ -37,7 +37,7 @@ class LaunchdaemonsRewrite extends Migration
             $table->index('keepalive');
         });
     }
-    
+
     public function down()
     {
         $capsule = new Capsule();
