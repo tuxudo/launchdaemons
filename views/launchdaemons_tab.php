@@ -32,7 +32,7 @@ $(document).on('appReady', function(){
                         
                     // Format returns
                     } else if(prop == 'daemon_json' ){
-					   rows = rows + '<tr><th>'+i18n.t('launchdaemons.'+prop)+'</th><td>'+d[prop].replace(/\n/g,'<br>')+'</td></tr>';
+					   rows = rows + '<tr><th>'+i18n.t('launchdaemons.'+prop)+'</th><td>'+d[prop].replace(/\n      /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n     /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n    /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n   /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n  /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n /g,'<br>&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n/g,'<br>')+'</td></tr>';
                     
                     // Else, build out rows from items
                     } else {
