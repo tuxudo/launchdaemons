@@ -62,7 +62,7 @@ class Launchdaemons_model extends \Model
             foreach ($plist as $daemon){
 
                 // Check if is a user daemon and if processing user daemons is allowed
-                if ( substr( $daemon['path'], 0, 7 ) === "/Users/" && !conf('user_agents')) {
+                if ( array_key_exists('path', $daemon) && ! empty($daemon['path']) && substr( $daemon['path'], 0, 7 ) === "/Users/" && !conf('user_agents')) {
                     continue;
                 }
 
