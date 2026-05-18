@@ -60,7 +60,9 @@ class Launchdaemons_controller extends Module_controller
 
         $sql = "SELECT *
                 FROM launchdaemons 
-                WHERE serial_number = '$serial_number'";
+                LEFT JOIN reportdata USING (serial_number)
+                ".get_machine_group_filter()."
+                AND serial_number = '$serial_number'";
         
         $queryobj = new Launchdaemons_model;
         jsonView($queryobj->query($sql));
