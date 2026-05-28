@@ -1,7 +1,7 @@
 {
-    "launchdaemons": "Launch Daemons",
+    "launchdaemons": "Launch Daemons & Agents",
     "daemon_json": "Daemon Contents",
-    "report": "Launch Daemons Report",
+    "report": "Launch Daemons & Agents Report",
     "seconds": "seconds",
     "minutes": "minutes",
     "hours": "hours",
@@ -75,5 +75,6 @@
     "hardresourcelimitsnumberoffiles": "Hard Resource Limits Number of Files",
     "hardresourcelimitsnumberofprocesses": "Hard Resource Limits Number of Processes",
     "hardresourcelimitsresidentsetsize": "Hard Resource Limits Resident Set Size",   
-    "hardresourcelimitsstack": "Hard Resource Limits Stack"
+    "hardresourcelimitsstack": "Hard Resource Limits Stack",
+    "view_button": " View "
 }
